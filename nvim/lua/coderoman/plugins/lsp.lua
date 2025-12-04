@@ -16,8 +16,6 @@ return {
     config = function()
         local cmp = require('cmp')
         local cmp_lsp = require("cmp_nvim_lsp")
-        
-        -- Capabilities for nvim-cmp
         local capabilities = vim.tbl_deep_extend(
             "force",
             {},
@@ -36,7 +34,8 @@ return {
                     local config = {
                         capabilities = capabilities,
                     }
-                    
+
+
                     -- Server-specific configurations
                     if server_name == "lua_ls" then
                         config.settings = {
@@ -48,25 +47,21 @@ return {
                             }
                         }
                     end
-                    
+
                     -- Apply the configuration using the new API
                     vim.lsp.config(server_name, config)
                 end,
             }
         })
 
-        -- Racket server setup (using the new API)
         vim.lsp.config('racket_langserver', {
             cmd = {"racket", "--lib", "racket-langserver"},
             capabilities = capabilities,
         })
         
-        -- Enable the Racket server
         vim.lsp.enable('racket_langserver')
 
-        -- nvim-cmp configuration (unchanged from your working setup)
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
-
         cmp.setup({
             snippet = {
                 expand = function(args)
@@ -74,10 +69,50 @@ return {
                 end,
             },
             mapping = cmp.mapping.preset.insert({
-                ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-                ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-                ["<C-Space>"] = cmp.mapping.complete(),
+                ['<Up>'] = cmp.mapping.select_prev_item(cmp_select),
+                ['<Down>'] = cmp.mapping.select_next_item(cmp_select),
+                ['<C-j>'] = cmp.mapping.select_prev_item(cmp_select),
+                ['<C-Space>'] = cmp.mapping.complete(),
+
+
+                ['<C-j>'] = cmp.mapping(function(fallback)
+                    if cmp.visible() then
+                      cmp.confirm({ select = true }) -- select without changing selection
+                    else
+                      fallback() 
+                    end
+                end, { 'i', 's' }),
+
+                ['<C-k>'] = cmp.mapping(function(fallback)
+                    if cmp.visible() then
+                      cmp.confirm({ select = true }) -- select without changing selection
+                    else
+                      fallback() 
+                    end
+                end, { 'i', 's' }),
+
+                ['<Tab>'] = cmp.mapping(function(fallback)
+                    if cmp.visible() then
+                      cmp.confirm({ select = true }) -- Select without changing selection
+                    else
+                      fallback() 
+                    end
+                end, { 'i', 's' }),
+
+                ['<CR>'] = cmp.mapping(function(fallback)
+                    if cmp.visible() then
+                      cmp.confirm({ select = true }) -- Select without changing selection
+                    else
+                      fallback()
+                    end
+                end, { 'i', 's' }),
+
+                -- Cancel
+                ['<C-e>'] = cmp.mapping.abort(),
+                
+                -- Scroll docs
+                ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+                ['<C-f>'] = cmp.mapping.scroll_docs(4),
             }),
             sources = cmp.config.sources({
                 { name = 'nvim_lsp' },
