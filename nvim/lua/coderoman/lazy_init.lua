@@ -18,8 +18,10 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	spec = {
-		{ import = "coderoman.plugins" },
-	},
+		{ import = "coderoman.plugins"},
+    },
 	checker = { enabled = true},
 })
+vim.cmd("colorscheme tokyonight")
+
 
