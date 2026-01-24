@@ -3,5 +3,8 @@ htop/
 mc/
 iterm2/
 fish/
+darktable/
+Sonarr/
+wireshark/
 !fish/config.fish
 !fish/fish_plugins
