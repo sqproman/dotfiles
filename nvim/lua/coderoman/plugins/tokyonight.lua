@@ -1,11 +1,11 @@
 return {
-  -- 1. Add the tokyonight plugin
-  {
-    "folke/tokyonight.nvim",
-    lazy = true,
-    opts = { 
-        style = "storm"
-    }, -- Set the style here (night, storm, moon, day)
+  "folke/tokyonight.nvim",
+  lazy = false,
+  priority = 1000,
+  opts = {
+    style = "storm",
   },
-  -- 2. Configure LazyVim to load tokyonight as the default colorscheme
+  config = function()
+    vim.cmd.colorscheme("tokyonight")
+  end,
 }
