@@ -61,6 +61,12 @@ return {
         
         vim.lsp.enable('racket_langserver')
 
+        vim.lsp.config('kotlin_language_server', {
+            capabilities = capabilities,
+        })
+
+        vim.lsp.enable('kotlin_language_server')
+
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
         cmp.setup({
             snippet = {
