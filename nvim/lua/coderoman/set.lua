@@ -1,3 +1,11 @@
+-- Editor options.
+--
+-- Mostly standard Vim options. The native-nvim-0.12-specific additions
+-- at the bottom of the file:
+--   - winborder:        global rounded border for floating windows
+--   - exrc:             trust per-project .nvim.lua / .exrc files
+--   - completeopt:      'popup' enables LSP completionItem/resolve preview
+
 -- vim.opt.guicursor = ""
 
 vim.opt.nu = true
@@ -31,3 +39,8 @@ vim.opt.updatetime = 50
 vim.opt.colorcolumn = "80"
 
 vim.opt.clipboard = "unnamedplus"
+
+-- Native nvim 0.12 additions
+vim.o.winborder = "rounded"        -- unified border style for all floating windows
+vim.o.exrc = true                  -- load .nvim.lua / .exrc from project dirs (use :trust to allow)
+vim.opt.completeopt = { "menu", "menuone", "noselect", "popup" } -- 'popup' enables native completion doc preview

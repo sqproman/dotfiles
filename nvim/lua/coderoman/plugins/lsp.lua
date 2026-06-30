@@ -1,170 +1,40 @@
+-- LSP configuration (native nvim 0.11+ API).
+--
+-- Per-server configs live in ~/.config/nvim/lsp/<name>.lua and are
+-- auto-discovered by `vim.lsp.enable`. This file just:
+--   1. Pulls in nvim-lspconfig for its bundled server defaults.
+--   2. Enables the servers we want.
+--   3. Sets up diagnostics.
+--   4. Adds keymaps for things the native defaults don't already bind.
+--
+-- What we are NOT using:
+--   - mason.nvim / mason-lspconfig.nvim (servers installed via Homebrew)
+--   - nvim-cmp + cmp-* sources (using vim.lsp.completion.enable instead)
+--   - LuaSnip / friendly-snippets (using native vim.snippet)
+--   - fidget.nvim (nvim 0.12 has native progress bars)
+--
+-- See :help lsp-defaults for everything you get for free (K for hover,
+-- CTRL-] for definition, gq for format, omnifunc for CTRL-X CTRL-O).
+
 return {
   "neovim/nvim-lspconfig",
-  dependencies = {
-    "williamboman/mason.nvim",
-    "williamboman/mason-lspconfig.nvim",
-    "hrsh7th/cmp-nvim-lsp",
-    "hrsh7th/cmp-buffer",
-    "hrsh7th/cmp-path",
-    "hrsh7th/cmp-cmdline",
-    "hrsh7th/nvim-cmp",
-    "L3MON4D3/LuaSnip",
-    "saadparwaiz1/cmp_luasnip",
-    "rafamadriz/friendly-snippets",
-    "j-hui/fidget.nvim",
-  },
+  event = { "BufReadPre", "BufNewFile" },
   config = function()
-    -- Setup fidget for LSP progress notifications
-    require("fidget").setup({})
+    local lsp = vim.lsp
 
-    -- Setup mason
-    require("mason").setup()
-
-    -- Setup nvim-cmp
-    local cmp = require("cmp")
-    local cmp_lsp = require("cmp_nvim_lsp")
-
-    -- Enhanced capabilities for LSP
-    local capabilities = vim.tbl_deep_extend(
-      "force",
-      {},
-      vim.lsp.protocol.make_client_capabilities(),
-      cmp_lsp.default_capabilities()
-    )
-
-    -- Setup luasnip + load VSCode-style snippets (friendly-snippets)
-    require("luasnip.loaders.from_vscode").lazy_load()
-
-    cmp.setup({
-      snippet = {
-        expand = function(args)
-          require("luasnip").lsp_expand(args.body)
-        end,
-      },
-      mapping = cmp.mapping.preset.insert({
-        ["<C-Space>"] = cmp.mapping.complete(),
-        ["<C-e>"] = cmp.mapping.abort(),
-        ["<CR>"] = cmp.mapping.confirm({ select = false }),
-        ["<Tab>"] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            cmp.select_next_item()
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
-        ["<S-Tab>"] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            cmp.select_prev_item()
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
-        ["<C-n>"] = cmp.mapping.select_next_item(),
-        ["<C-p>"] = cmp.mapping.select_prev_item(),
-        ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-        ["<C-f>"] = cmp.mapping.scroll_docs(4),
-      }),
-      sources = cmp.config.sources({
-        { name = "nvim_lsp" },
-        { name = "luasnip" },
-      }, {
-        { name = "buffer" },
-        { name = "path" },
-      }),
+    -- Enable every server that has a config in lsp/.
+    -- With nvim-lspconfig on the runtimepath, these inherit the
+    -- server defaults (cmd, filetypes, root_markers) and we override
+    -- only what we need to in each lsp/<name>.lua file.
+    lsp.enable({
+      "lua_ls",
+      "clangd",
+      "racket_langserver",
+      "kotlin_language_server",
     })
 
-    -- Optional: Setup cmdline completion
-    cmp.setup.cmdline({ "/", "?" }, {
-      mapping = cmp.mapping.preset.cmdline(),
-      sources = {
-        { name = "buffer" },
-      },
-    })
-
-    cmp.setup.cmdline(":", {
-      mapping = cmp.mapping.preset.cmdline(),
-      sources = cmp.config.sources({
-        { name = "path" },
-      }, {
-        { name = "cmdline" },
-      }),
-    })
-
-    -- Setup mason-lspconfig
-    require("mason-lspconfig").setup({
-      ensure_installed = { "lua_ls", "clangd" },
-      automatic_installation = true,
-            automatic_enable = true,
-    })
-
-
-    -- Configure LSP servers using vim.lsp.config (new API)
-
-    -- Lua LS configuration
-    vim.lsp.config("lua_ls", {
-      capabilities = capabilities,
-      settings = {
-        Lua = {
-          runtime = { version = "LuaJIT" },
-          diagnostics = {
-            globals = { "vim", "bit", "it", "describe", "before_each", "after_each" },
-          },
-          workspace = {
-            library = vim.api.nvim_get_runtime_file("", true),
-            checkThirdParty = false,
-          },
-          telemetry = { enable = false },
-        },
-      },
-    })
-
-    -- Clangd configuration
-    vim.lsp.config("clangd", {
-      capabilities = capabilities,
-    })
-
-    -- Racket langserver configuration
-    vim.lsp.config("racket_langserver", {
-      capabilities = capabilities,
-      cmd = { "racket", "--lib", "racket-langserver" },
-    })
-
-    -- Kotlin language server configuration
-    vim.lsp.config("kotlin_language_server", {
-      capabilities = capabilities,
-    })
-
-    -- Global keybindings for LSP
-    vim.api.nvim_create_autocmd("LspAttach", {
-      group = vim.api.nvim_create_augroup("UserLspConfig", {}),
-      callback = function(ev)
-        local opts = { buffer = ev.buf }
-
-        -- Enable completion triggered by <c-x><c-o>
-        vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
-
-        -- Keybindings
-        vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-        vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-        vim.keymap.set("n", "<C-k>", vim.lsp.buf.signature_help, opts)
-        vim.keymap.set("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
-        vim.keymap.set("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
-        vim.keymap.set("n", "<leader>wl", function()
-          print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-        end, opts)
-        vim.keymap.set("n", "<leader>D", vim.lsp.buf.type_definition, opts)
-        vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-        vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
-        vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-        vim.keymap.set("n", "<leader>f", function()
-          vim.lsp.buf.format({ async = true })
-        end, opts)
-      end,
-    })
-
-    -- Configure diagnostics
+    -- Diagnostics UI. Native defaults already enable virtual text,
+    -- signs, and underline; this just tweaks the float window.
     vim.diagnostic.config({
       virtual_text = true,
       signs = true,
@@ -180,8 +50,43 @@ return {
       },
     })
 
-    -- Diagnostic keybindings
-    vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float)
-    vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist)
+    -- Keymaps for LSP features NOT covered by the native defaults
+    -- (K, gd-via-tagfunc, gq are already bound by defaults).
+    --
+    -- We attach these on LspAttach so they only apply to LSP-enabled buffers.
+    vim.api.nvim_create_autocmd("LspAttach", {
+      group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+      callback = function(ev)
+        local opts = function(desc)
+          return { buffer = ev.buf, desc = desc }
+        end
+
+        -- Navigation
+        vim.keymap.set("n", "gd", lsp.buf.definition, opts("Go to definition"))
+        vim.keymap.set("n", "gD", lsp.buf.declaration, opts("Go to declaration"))
+        vim.keymap.set("n", "gi", lsp.buf.implementation, opts("Go to implementation"))
+        vim.keymap.set("n", "gr", lsp.buf.references, opts("Go to references"))
+        vim.keymap.set("n", "<leader>D", lsp.buf.type_definition, opts("Type definition"))
+
+        -- Code actions
+        vim.keymap.set("n", "<leader>rn", lsp.buf.rename, opts("Rename symbol"))
+        vim.keymap.set({ "n", "v" }, "<leader>ca", lsp.buf.code_action, opts("Code action"))
+
+        -- Note: `<leader>f` for format is mapped by conform.nvim (see
+        -- plugins/conform.lua). `gq{motion}` still works natively for
+        -- line-range formatting via vim.lsp.formatexpr.
+
+        -- Workspace folders (rarely used, but native)
+        vim.keymap.set("n", "<leader>wa", lsp.buf.add_workspace_folder, opts("Add workspace folder"))
+        vim.keymap.set("n", "<leader>wr", lsp.buf.remove_workspace_folder, opts("Remove workspace folder"))
+        vim.keymap.set("n", "<leader>wl", function()
+          print(vim.inspect(lsp.buf.list_workspace_folders()))
+        end, opts("List workspace folders"))
+      end,
+    })
+
+    -- Global diagnostic keymaps (apply in every buffer, not just LSP ones)
+    vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic float" })
+    vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostics in loclist" })
   end,
 }
