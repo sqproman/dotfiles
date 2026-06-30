@@ -10,6 +10,7 @@ return {
     "hrsh7th/nvim-cmp",
     "L3MON4D3/LuaSnip",
     "saadparwaiz1/cmp_luasnip",
+    "rafamadriz/friendly-snippets",
     "j-hui/fidget.nvim",
   },
   config = function()
@@ -31,8 +32,8 @@ return {
       cmp_lsp.default_capabilities()
     )
 
-    -- Setup luasnip
-    require("luasnip")
+    -- Setup luasnip + load VSCode-style snippets (friendly-snippets)
+    require("luasnip.loaders.from_vscode").lazy_load()
 
     cmp.setup({
       snippet = {

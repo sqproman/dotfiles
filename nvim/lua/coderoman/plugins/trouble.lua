@@ -8,19 +8,13 @@ return {
 
     vim.keymap.set("n", "<leader>tt", function()
       require("trouble").toggle()
-    end)
+    end, { desc = "Toggle Trouble" })
 
-    vim.keymap.set("n", "[t", function()
-      require("trouble").next({ skip_groups = true, jump = true })
-    end)
-
-    vim.keymap.set("n", "]t", function()
-      require("trouble").previous({ skip_groups = true, jump = true })
-    end)
+    vim.keymap.set("n", "[t", "<cmd>Trouble prev<cr>", { desc = "Previous trouble item" })
+    vim.keymap.set("n", "]t", "<cmd>Trouble next<cr>", { desc = "Next trouble item" })
 
     vim.keymap.set("n", "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", { desc = "Toggle Diagnostics" })
-    vim.keymap.set("n", "<leader>xw", "<cmd>Trouble workspace_diagnostics toggle<cr>", { desc = "Workspace Diagnostics" })
-    vim.keymap.set("n", "<leader>xq", "<cmd>Trouble quickfix toggle<cr>", { desc = "Quickfix List" })
+    vim.keymap.set("n", "<leader>xq", "<cmd>Trouble qflist toggle<cr>", { desc = "Quickfix List" })
     vim.keymap.set("n", "<leader>xl", "<cmd>Trouble loclist toggle<cr>", { desc = "Location List" })
   end
 }
