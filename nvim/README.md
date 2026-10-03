@@ -23,13 +23,16 @@ we use a focused plugin and document why.
   `vim.o.winborder`, `vim.o.exrc` parent-dir walk, native progress bars).
 - A Nerd Font for icons (used by neo-tree, trouble, etc.).
 - `ripgrep` for telescope live-grep.
+- `tree-sitter` CLI (`brew install tree-sitter-cli`) — the rewritten
+  nvim-treesitter `main` branch compiles parsers with it.
 - Homebrew (or equivalent) for LSP servers and formatters.
 
 ## Install
 
 ```bash
-# Required for telescope
+# Required for telescope / treesitter parser builds
 brew install ripgrep
+brew install tree-sitter-cli
 
 # LSP servers (one per language you actually use)
 brew install lua-language-server           # lua_ls
@@ -134,7 +137,7 @@ to the `lsp.enable({...})` list in `lua/coderoman/plugins/lsp.lua`.
 | Fuzzy finder | — | `telescope.nvim` |
 | Diagnostics list | `:lopen` / `:copen` | `trouble.nvim` (richer UI) |
 | Keymap discovery | — | `which-key.nvim` |
-| Syntax highlight | (basic regex) | `nvim-treesitter` (parser-based) |
+| Syntax highlight | `vim.treesitter.start()` | `nvim-treesitter` (parser distribution) |
 | Formatting | `vim.lsp.buf.format` (LSP-served) | `conform.nvim` (external binaries + LSP fallback) |
 | Undo tree | `:undolist` | `undotree` (visual tree) |
 | Plugin manager | `vim.pack` (minimal) | `lazy.nvim` (lazy-loading + lock) |
@@ -146,7 +149,7 @@ to the `lsp.enable({...})` list in `lua/coderoman/plugins/lsp.lua`.
 |---|---|
 | `folke/lazy.nvim` | Plugin manager. `vim.pack` exists in 0.12 but has no lazy-loading, dependency resolution, or lock file. |
 | `neovim/nvim-lspconfig` | Bundled defaults for ~150 LSP servers (cmd, filetypes, root_markers). We don't `require()` it directly — it just needs to be on the runtimepath. |
-| `nvim-treesitter/nvim-treesitter` | Tree-sitter parser distribution + highlight/indent modules. |
+| `nvim-treesitter/nvim-treesitter` | Tree-sitter parser distribution (`main` branch rewrite — no more `configs.setup()`). Highlighting/indent are native; see [Tree-sitter](#tree-sitter). |
 | `nvim-telescope/telescope.nvim` | Fuzzy finder for files, grep, LSP results. No native equivalent. |
 | `nvim-neo-tree/neo-tree.nvim` | File explorer. netrw exists but is much less ergonomic. |
 | `folke/trouble.nvim` | Diagnostics / quickfix / loclist / LSP references UI. |
@@ -345,6 +348,32 @@ indent configured in `set.lua`. If you want stylua to use spaces, drop a
 indent_type = "Spaces"
 indent_width = 4
 ```
+
+## Tree-sitter
+
+`plugins/treesitter.lua` tracks the rewritten **`main` branch** of
+nvim-treesitter. That branch dropped `configs.setup()` entirely — no
+`ensure_installed`, no `auto_install`, no highlight/indent modules.
+Instead:
+
+- **Parsers** are installed explicitly: on startup the config diffs
+  `require("nvim-treesitter.config").get_installed("parsers")` against the
+  `ensure_installed` list in the plugin file and installs what's missing.
+  `:TSUpdate` updates parsers (also runs automatically on plugin updates
+  via the spec's `build`).
+- **Highlighting** is Neovim's native treesitter highlighter: a `FileType`
+  autocmd calls `pcall(vim.treesitter.start, buf)` in every buffer that has
+  a parser.
+- **Indentation**: those buffers get
+  `indentexpr = v:lua.require'nvim-treesitter'.indentexpr()`.
+
+Parser compilation needs the tree-sitter CLI on `$PATH`
+(`brew install tree-sitter-cli` — note the `-cli` suffix; the plain
+`tree-sitter` formula is just the C library).
+
+To add a language: add it to `ensure_installed` in
+`plugins/treesitter.lua`, or run `:TSInstall <lang>` for an immediate
+install.
 
 ## Why no mason
 
