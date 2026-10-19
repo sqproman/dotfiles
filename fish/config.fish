@@ -161,6 +161,3 @@ set -gx PATH $PATH ~/.lmstudio/bin
 # End of LM Studio CLI section
 
 rvm default
-
-# opencode
-fish_add_path /Users/coderoman/.opencode/bin
