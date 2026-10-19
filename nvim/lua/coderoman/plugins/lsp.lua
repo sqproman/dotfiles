@@ -31,6 +31,13 @@ return {
       "clangd",
       "racket_langserver",
       "kotlin_language_server",
+      "pyright",
+      "vtsls",
+      "html",
+      "cssls",
+      "jsonls",
+      "bashls",
+      "yamlls",
     })
 
     -- Diagnostics UI. Native defaults already enable virtual text,

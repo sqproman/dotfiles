@@ -38,6 +38,11 @@ brew install tree-sitter-cli
 brew install lua-language-server           # lua_ls
 brew install llvm                          # provides clangd (keg-only — see below)
 brew install kotlin-language-server
+brew install pyright                       # python
+brew install vtsls                         # typescript / javascript
+brew install vscode-langservers-extracted  # html, css, json (+ eslint)
+brew install bash-language-server          # sh / bash
+brew install yaml-language-server          # yaml
 
 # Racket (the racket-langserver is installed via raco, not Homebrew)
 brew install --cask racket
@@ -50,6 +55,14 @@ brew install prettier                      # js/ts/css/html/json/yaml/markdown
 brew install shfmt                         # bash/sh
 # Already bundled with other installs:
 #   clang-format (via llvm), ktlint, fish_indent, raco fmt
+
+# Linters (used by nvim-lint)
+brew install shellcheck                    # sh / bash
+# Already bundled with other installs:
+#   ruff (python), ktlint (kotlin), clang-tidy (via llvm)
+
+# Git
+brew install lazygit                       # <leader>gg floating toggle
 ```
 
 ### `clangd` is keg-only
@@ -95,15 +108,25 @@ mkdir -p ~/.vim/undodir
 │   ├── lua_ls.lua
 │   ├── clangd.lua
 │   ├── racket_langserver.lua
-│   └── kotlin_language_server.lua
+│   ├── kotlin_language_server.lua
+│   ├── pyright.lua
+│   ├── vtsls.lua
+│   ├── html.lua
+│   ├── cssls.lua
+│   ├── jsonls.lua
+│   ├── bashls.lua
+│   └── yamlls.lua
 └── lua/coderoman/
     ├── init.lua                  # loads set → remap → autocmds → lazy
     ├── set.lua                   # editor options
-    ├── remap.lua                 # core keymaps (leader-pv, etc.)
-    ├── autocmds.lua              # native LSP completion, yank highlight
+    ├── remap.lua                 # core keymaps (leader-pv, lazygit toggle)
+│   ├── autocmds.lua              # native LSP completion, yank highlight
     ├── lazy_init.lua             # lazy.nvim bootstrap + spec import
     └── plugins/
         ├── lsp.lua               # nvim-lspconfig + enable() + diagnostics
+        ├── lint.lua              # nvim-lint (ruff, ktlint, clangtidy, shellcheck)
+        ├── gitsigns.lua
+        ├── lualine.lua
         ├── treesitter.lua
         ├── telescope.lua
         ├── neotree.lua
@@ -139,6 +162,9 @@ to the `lsp.enable({...})` list in `lua/coderoman/plugins/lsp.lua`.
 | Keymap discovery | — | `which-key.nvim` |
 | Syntax highlight | `vim.treesitter.start()` | `nvim-treesitter` (parser distribution) |
 | Formatting | `vim.lsp.buf.format` (LSP-served) | `conform.nvim` (external binaries + LSP fallback) |
+| Linting | `vim.diagnostic` (display/triage) | `nvim-lint` (runs ruff, ktlint, clang-tidy, shellcheck) |
+| Statusline | default statusline | `lualine.nvim` |
+| Git | — | `gitsigns.nvim` (signs/hunks) + lazygit (`<leader>gg`, no plugin) |
 | Undo tree | `:undolist` | `undotree` (visual tree) |
 | Plugin manager | `vim.pack` (minimal) | `lazy.nvim` (lazy-loading + lock) |
 | Colorscheme | built-in schemes | `tokyonight.nvim` |
@@ -149,6 +175,9 @@ to the `lsp.enable({...})` list in `lua/coderoman/plugins/lsp.lua`.
 |---|---|
 | `folke/lazy.nvim` | Plugin manager. `vim.pack` exists in 0.12 but has no lazy-loading, dependency resolution, or lock file. |
 | `neovim/nvim-lspconfig` | Bundled defaults for ~150 LSP servers (cmd, filetypes, root_markers). We don't `require()` it directly — it just needs to be on the runtimepath. |
+| `mfussenegger/nvim-lint` | Linting via external binaries (ruff, ktlint, clang-tidy, shellcheck) feeding `vim.diagnostic`. The counterpart to conform (which formats). |
+| `lewis6991/gitsigns.nvim` | Git gutter signs, hunk navigation/staging, blame. |
+| `nvim-lualine/lualine.nvim` | Statusline (mode, branch, diagnostics, file info). |
 | `nvim-treesitter/nvim-treesitter` | Tree-sitter parser distribution (`main` branch rewrite — no more `configs.setup()`). Highlighting/indent are native; see [Tree-sitter](#tree-sitter). |
 | `nvim-telescope/telescope.nvim` | Fuzzy finder for files, grep, LSP results. No native equivalent. |
 | `nvim-neo-tree/neo-tree.nvim` | File explorer. netrw exists but is much less ergonomic. |
@@ -227,6 +256,20 @@ to the `lsp.enable({...})` list in `lua/coderoman/plugins/lsp.lua`.
 | `<leader>xq` | Quickfix list |
 | `<leader>xl` | Location list |
 | `[t` / `]t` | Prev / next item |
+
+### Git (gitsigns + lazygit)
+
+| Key | Action |
+|---|---|
+| `<leader>gg` | lazygit in a floating window (native terminal, no plugin) |
+| `]h` / `[h` | Next / previous git hunk |
+| `]H` / `[H` | Last / first hunk |
+| `<leader>hs` | Stage hunk (works in visual mode too) |
+| `<leader>hr` | Reset hunk (works in visual mode too) |
+| `<leader>hp` | Preview hunk |
+| `<leader>hb` | Blame line |
+| `<leader>hS` / `<leader>hR` | Stage / reset whole buffer |
+| `<leader>hd` | Diff buffer against index |
 
 ### File explorer / misc
 
@@ -374,6 +417,24 @@ Parser compilation needs the tree-sitter CLI on `$PATH`
 To add a language: add it to `ensure_installed` in
 `plugins/treesitter.lua`, or run `:TSInstall <lang>` for an immediate
 install.
+
+## Linting
+
+`plugins/lint.lua` wires up [`nvim-lint`](https://github.com/mfussenegger/nvim-lint)
+— the linting counterpart to conform (which only formats). It runs external
+binaries on `BufEnter` / `BufWritePost` / `InsertLeave` and feeds results
+into `vim.diagnostic` (so `<leader>e`, Trouble, and the lualine diagnostic
+count all show them).
+
+| Filetype | Linter | Install |
+|---|---|---|
+| python | `ruff` | `brew install ruff` |
+| kotlin | `ktlint` | `brew install ktlint` |
+| c, cpp | `clang-tidy` | (bundled with `brew install llvm`) |
+| sh, bash | `shellcheck` | `brew install shellcheck` |
+
+To add a linter: add it to `linters_by_ft` in `plugins/lint.lua` (see
+`:lua =require('lint').linters_by_ft` for names nvim-lint knows).
 
 ## Why no mason
 

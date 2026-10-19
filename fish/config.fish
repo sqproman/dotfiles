@@ -5,7 +5,7 @@ end
 
 set -gx HOMEBREW_HOME /opt/homebrew/bin
 set -gx CHRUBY_ROOT /opt/homebrew/opt/chruby
-set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home/
+set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/zulu-21.jdk/Contents/Home/
 
 set -gx PATH $PATH ~/Library/Android/sdk/platform-tools
 set -gx ANDROID_HOME ~/Library/Android/sdk
@@ -26,6 +26,7 @@ set -gx PATH "$GOPATH/bin" $PATH
 set -gx PATH "$ANDROID_HOME/emulator" $PATH
 set -gx PATH "$RACKET_HOME/bin" $PATH
 set -gx PATH "$HOMEBREW_HOME" $PATH
+set -gx PATH /opt/homebrew/sbin $PATH
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '~/Downloads/google-cloud-sdk/path.fish.inc' ]; . '~/Downloads/google-cloud-sdk/path.fish.inc'; end
@@ -160,3 +161,6 @@ set -gx PATH $PATH ~/.lmstudio/bin
 # End of LM Studio CLI section
 
 rvm default
+
+# opencode
+fish_add_path /Users/coderoman/.opencode/bin
