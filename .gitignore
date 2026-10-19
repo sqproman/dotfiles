@@ -8,3 +8,4 @@ Sonarr/
 wireshark/
 !fish/config.fish
 !fish/fish_plugins
+zed/settings.json
