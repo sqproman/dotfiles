@@ -93,7 +93,7 @@ return {
     })
 
     -- Global diagnostic keymaps (apply in every buffer, not just LSP ones)
-    vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic float" })
+    vim.keymap.set("n", "gl", vim.diagnostic.open_float, { desc = "Show diagnostic float" })
     vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostics in loclist" })
   end,
 }
