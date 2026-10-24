@@ -2,6 +2,14 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 
+-- Window navigation without the Ctrl-w prefix (<C-l> shadows redraw,
+-- nothing else loses a useful default). These are also the keys
+-- vim-tmux-navigator uses, so tmux panes can join the same grid later.
+vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Window left" })
+vim.keymap.set("n", "<C-j>", "<C-w>j", { desc = "Window down" })
+vim.keymap.set("n", "<C-k>", "<C-w>k", { desc = "Window up" })
+vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Window right" })
+
 -- Floating lazygit (<leader>gg). Native terminal in a floating window —
 -- no plugin needed; the window closes when lazygit exits. Opens at the
 -- git root of the current file so the file browser shows the whole repo.
