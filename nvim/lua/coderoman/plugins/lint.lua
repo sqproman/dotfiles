@@ -15,6 +15,10 @@ return {
       cpp = { "clangtidy" },
       sh = { "shellcheck" },
       bash = { "shellcheck" },
+      javascript = { "eslint" },
+      javascriptreact = { "eslint" },
+      typescript = { "eslint" },
+      typescriptreact = { "eslint" },
     }
 
     local group = vim.api.nvim_create_augroup("coderoman_lint", { clear = true })

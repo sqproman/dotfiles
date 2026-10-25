@@ -35,7 +35,7 @@ if command -v brew >/dev/null 2>&1; then
   # clangd and clang-tidy come from llvm; html/cssls/jsonls from vscode-langservers-extracted.
   brew install neovim node lua-language-server llvm pyright vtsls \
     vscode-langservers-extracted bash-language-server yaml-language-server \
-    kotlin-language-server stylua ruff shfmt prettier shellcheck ktlint || true
+    kotlin-language-server stylua ruff shfmt prettier shellcheck ktlint eslint || true
   # racket_langserver is NOT installed here — needs racket + raco pkg,
   # install manually if you do Racket.
   echo "==> Homebrew: installing Nerd Font"
