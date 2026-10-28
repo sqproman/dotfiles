@@ -2,7 +2,6 @@ if status is-interactive
     # Commands to run in interactive sessions can go here
 end
 
-
 set -gx HOMEBREW_HOME /opt/homebrew/bin
 set -gx CHRUBY_ROOT /opt/homebrew/opt/chruby
 set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/zulu-21.jdk/Contents/Home/
@@ -14,9 +13,9 @@ set -gx ANDROID_NDK_ROOT ~/Library/Android/sdk/ndk/26.0.10792818
 set -gx ANDROID_AVD_HOME ~/.android/avd
 set -gx GOPATH ~/go
 set -gx RACKET_HOME /Applications/Racket
-set -gx LDFLAGS "-L/opt/homebrew/opt/llvm/lib"
-set -gx CPPFLAGS "-I/opt/homebrew/opt/llvm/include"
-set -gx CMAKE_PREFIX_PATH "/opt/homebrew/opt/llvm"
+set -gx LDFLAGS -L/opt/homebrew/opt/llvm/lib
+set -gx CPPFLAGS -I/opt/homebrew/opt/llvm/include
+set -gx CMAKE_PREFIX_PATH /opt/homebrew/opt/llvm
 
 set -gx VOLTA_HOME "$HOME/.volta"
 set -gx PATH "$VOLTA_HOME/bin" $PATH
@@ -27,9 +26,6 @@ set -gx PATH "$ANDROID_HOME/emulator" $PATH
 set -gx PATH "$RACKET_HOME/bin" $PATH
 set -gx PATH "$HOMEBREW_HOME" $PATH
 set -gx PATH /opt/homebrew/sbin $PATH
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '~/Downloads/google-cloud-sdk/path.fish.inc' ]; . '~/Downloads/google-cloud-sdk/path.fish.inc'; end
 
 fish_vi_key_bindings
 
@@ -42,7 +38,7 @@ alias gup='git pull --rebase'
 alias gp='git push'
 
 function gdv
-  git diff -w $argv | view -
+    git diff -w $argv | view -
 end
 
 alias gc='git commit -v'
@@ -104,15 +100,13 @@ alias grt='cd (git rev-parse --show-toplevel; or echo ".")'
 #
 
 function current_branch
-  set ref (git symbolic-ref HEAD 2> /dev/null); or \
-  set ref (git rev-parse --short HEAD 2> /dev/null); or return
-  echo ref | sed s-refs/heads--
+    set ref (git symbolic-ref HEAD 2> /dev/null); or set ref (git rev-parse --short HEAD 2> /dev/null); or return
+    echo ref | sed s-refs/heads--
 end
 
 function current_repository
-  set ref (git symbolic-ref HEAD 2> /dev/null); or \
-  set ref (git rev-parse --short HEAD 2> /dev/null); or return
-  echo (git remote -v | cut -d':' -f 2)
+    set ref (git symbolic-ref HEAD 2> /dev/null); or set ref (git rev-parse --short HEAD 2> /dev/null); or return
+    echo (git remote -v | cut -d':' -f 2)
 end
 
 # these aliases take advantage of the previous function
@@ -127,9 +121,10 @@ alias ggpnp='git pull origin (current_branch); and git push origin (current_bran
 
 # Pretty log messages
 function _git_log_prettily
-  if ! [ -z $1 ]; then
-    git log --pretty=$1
-  end
+    if ! [ -z $1 ]
+        then
+        git log --pretty=$1
+    end
 end
 
 alias glp="_git_log_prettily"
@@ -141,9 +136,10 @@ alias glp="_git_log_prettily"
 #
 # This function return a warning if the current branch is a wip
 function work_in_progress
-  if git log -n 1 | grep -q -c wip; then
-    echo "WIP!!"
-  end
+    if git log -n 1 | grep -q -c wip
+        then
+        echo "WIP!!"
+    end
 end
 
 # these alias commit and uncomit wip branches
@@ -155,9 +151,11 @@ alias gunwip='git log -n 1 | grep -q -c wip; and git reset HEAD~1'
 set -x PATH "/Library/Frameworks/Python.framework/Versions/3.11/bin" "$PATH"
 set -x PATH "/Library/Application\ Support/JetBrains/Toolbox/scripts" "$PATH"
 
-
-# Added by LM Studio CLI (lms)
 set -gx PATH $PATH ~/.lmstudio/bin
-# End of LM Studio CLI section
 
-rvm default
+# Nessy CLI PATH block begin
+set -l nessy_bin_dir '/Users/r.romenko/.local/bin'
+if not contains -- $nessy_bin_dir $PATH
+    set -gx PATH $nessy_bin_dir $PATH
+end
+# Nessy CLI PATH block end
