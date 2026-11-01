@@ -2,9 +2,9 @@ return {
   "folke/trouble.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
-    require("trouble").setup({
-      icons = true,
-    })
+    -- No icons option: in trouble v3 it must be a table (per-icon
+    -- overrides), not a boolean. Defaults already use nvim-web-devicons.
+    require("trouble").setup()
 
     -- v3 command syntax is :Trouble [mode] [action] [options]; jumping
     -- between items goes through the Lua API.
