@@ -33,7 +33,7 @@ if command -v brew >/dev/null 2>&1; then
   echo "==> Homebrew: installing nvim + LSP servers + formatters/linters"
   # Config uses Homebrew instead of mason.nvim (see nvim/lua/coderoman/plugins/lsp.lua).
   # clangd and clang-tidy come from llvm; html/cssls/jsonls from vscode-langservers-extracted.
-  brew install neovim node lua-language-server llvm pyright vtsls \
+  brew install neovim node tree-sitter lua-language-server llvm pyright vtsls \
     vscode-langservers-extracted bash-language-server yaml-language-server \
     kotlin-language-server stylua ruff shfmt prettier shellcheck ktlint eslint || true
   # racket_langserver is NOT installed here — needs racket + raco pkg,
