@@ -49,6 +49,11 @@ if command -v nvim >/dev/null 2>&1; then
   nvim --headless "+Lazy! sync" +qa || true
 fi
 
+if command -v fish >/dev/null 2>&1; then
+  echo "==> fish: installing plugins (fisher)"
+  fish -c 'fisher update' || true
+fi
+
 echo
 echo "Done. Next steps:"
 echo "  1. Fully quit iTerm2 (Cmd-Q) and reopen — font + prefs take effect"
