@@ -29,3 +29,22 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     vim.hl.on_yank({ timeout = 200 })
   end,
 })
+
+-- Prettier's default tabWidth is 2. Buffers it formats get a matching
+-- 2-space indent so new lines match what format-on-save produces (see
+-- plugins/conform.lua); the global 4-space style from set.lua applies
+-- everywhere else.
+vim.api.nvim_create_autocmd("FileType", {
+  group = group,
+  desc = "Match prettier's 2-space indent for the filetypes it formats",
+  pattern = {
+    "javascript", "typescript",
+    "javascriptreact", "typescriptreact",
+    "css", "html", "json", "jsonc", "yaml", "markdown",
+  },
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.softtabstop = 2
+  end,
+})
