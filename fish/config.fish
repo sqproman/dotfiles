@@ -159,3 +159,6 @@ if not contains -- $nessy_bin_dir $PATH
     set -gx PATH $nessy_bin_dir $PATH
 end
 # Nessy CLI PATH block end
+
+# Added by Nessy CLI standalone installer
+fish_add_path "/Users/r.romenko/.local/bin"
